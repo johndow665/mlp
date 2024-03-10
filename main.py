@@ -26,15 +26,18 @@ try:
         for line in file:
             record = line.strip()  # Убираем пробельные символы в начале и конце строки
             if record:  # Проверяем, что строка не пустая
-                collection.insert_one({'data': record})
-                count += 1
-                if count % 10000 == 0:  # Каждые 10 000 строк выводим сообщение
-                    print(f"Добавлено {count} записей в базу данных.")
+                try:
+                    collection.insert_one({'data': record})
+                    count += 1
+                    if count % 10000 == 0:  # Каждые 10 000 строк выводим сообщение
+                        print(f"Добавлено {count} записей в базу данных.")
+                except Exception as e:
+                    print(f"Ошибка при добавлении записи в базу данных: {e}")
         print(f"Всего добавлено {count} записей в базу данных.")
 except FileNotFoundError:
     print(f"Файл {file_path} не найден.")
 except Exception as e:
-    print(f"Произошла ошибка при чтении файла или записи в базу данных: {e}")
+    print(f"Произошла ошибка при чтении файла: {e}")
 
 # Закрываем соединение с MongoDB
 client.close()
