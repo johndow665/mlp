@@ -10,9 +10,14 @@ if len(sys.argv) != 2:
 file_path = sys.argv[1]
 
 # Подключение к MongoDB
-client = MongoClient('localhost', 27017)  # Подключение к локальному MongoDB
-db = client['pass']  # База данных 'pass'
-collection = db['pass']  # Коллекция 'pass'
+try:
+    client = MongoClient('localhost', 27017)  # Подключение к локальному MongoDB
+    db = client['pass']  # База данных 'pass'
+    collection = db['pass']  # Коллекция 'pass'
+    print("Успешное подключение к MongoDB.")
+except Exception as e:
+    print(f"Не удалось подключиться к MongoDB: {e}")
+    sys.exit(1)
 
 # Чтение файла и запись в MongoDB
 try:
@@ -29,7 +34,7 @@ try:
 except FileNotFoundError:
     print(f"Файл {file_path} не найден.")
 except Exception as e:
-    print(f"Произошла ошибка: {e}")
+    print(f"Произошла ошибка при чтении файла или записи в базу данных: {e}")
 
 # Закрываем соединение с MongoDB
 client.close()
