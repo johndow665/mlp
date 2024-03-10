@@ -37,3 +37,12 @@ db.pass.countDocuments()
 use pass
 
 db.pass.drop()
+
+
+db.collectionName.deleteMany({
+  $or: [
+    { "fieldName": { $not: { $regex: /^.{6,32}$/ } } }
+  ]
+});
+
+Замените collectionName на имя вашей коллекции и `fieldName
