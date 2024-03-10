@@ -1,21 +1,26 @@
 from pymongo import MongoClient
 import sys
 import os
+import argparse
 
-# Проверяем, передан ли путь к директории в аргументах командной строки
-if len(sys.argv) != 2:
-    print("Пожалуйста, укажите путь к директории в качестве аргумента.")
-    sys.exit(1)
+# Создаем парсер аргументов командной строки
+parser = argparse.ArgumentParser(description='Загрузка файлов в MongoDB')
+parser.add_argument('directory', help='Путь к директории с файлами')
+parser.add_argument('-d', '--database', required=True, help='Имя базы данных MongoDB')
+parser.add_argument('-c', '--collection', required=True, help='Имя коллекции MongoDB')
+
+# Парсим аргументы
+args = parser.parse_args()
 
 # Путь к директории из аргумента командной строки
-dir_path = sys.argv[1]
+dir_path = args.directory
 
 # Подключение к MongoDB
 try:
     client = MongoClient('localhost', 27017)
-    db = client['pass']
-    collection = db['pass']
-    print("Успешное подключение к MongoDB.")
+    db = client[args.database]
+    collection = db[args.collection]
+    print(f"Успешное подключение к MongoDB. База данных: {args.database}, Коллекция: {args.collection}")
 except Exception as e:
     print(f"Не удалось подключиться к MongoDB: {e}")
     sys.exit(1)
