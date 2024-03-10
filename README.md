@@ -31,3 +31,9 @@ db.zz.find().pretty()
 
 посмотреть кол-во записей
 db.pass.countDocuments()
+
+очистка бд
+
+use pass
+
+db.pass.drop()
