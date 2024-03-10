@@ -17,13 +17,15 @@ collection = db['pass']  # Коллекция 'pass'
 # Чтение файла и запись в MongoDB
 try:
     with open(file_path, 'r') as file:
+        count = 0  # Счетчик для отслеживания количества обработанных строк
         for line in file:
-            # Предполагаем, что каждая строка файла - это отдельная запись
             record = line.strip()  # Убираем пробельные символы в начале и конце строки
             if record:  # Проверяем, что строка не пустая
-                # Вставляем запись в коллекцию как документ
                 collection.insert_one({'data': record})
-    print("Данные успешно добавлены в MongoDB.")
+                count += 1
+                if count % 10000 == 0:  # Каждые 10 000 строк выводим сообщение
+                    print(f"Добавлено {count} записей в базу данных.")
+        print(f"Всего добавлено {count} записей в базу данных.")
 except FileNotFoundError:
     print(f"Файл {file_path} не найден.")
 except Exception as e:
