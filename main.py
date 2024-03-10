@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import sys
 import os
 import argparse
+import random
 
 # Создаем парсер аргументов командной строки
 parser = argparse.ArgumentParser(description='Загрузка файлов в MongoDB')
@@ -38,35 +39,42 @@ loaded_files = set()
 with open(loaded_file_path, 'r') as loaded_file:
     loaded_files = {line.strip() for line in loaded_file}
 
-# Обработка файлов в директории
-for filename in os.listdir(dir_path):
-    if filename not in loaded_files:
-        file_path = os.path.join(dir_path, filename)
-        print(f"Начинаем обработку файла {filename}...")
-        try:
-            with open(file_path, 'r') as file:
-                count = 0
-                for line in file:
-                    record = line.strip()
-                    if record:
-                        try:
-                            collection.insert_one({'data': record})
-                            count += 1
-                            if count % 10000 == 0:
-                                print(f"Файл {filename}: добавлено {count} записей в базу данных.")
-                        except Exception as e:
-                            print(f"Ошибка при добавлении записи в базу данных: {e}")
-                print(f"Закончил чтение и запись файла {filename}. Всего добавлено {count} записей.")
-                # Записываем имя файла в loaded.txt
-                with open(loaded_file_path, 'a') as loaded_file:
-                    loaded_file.write(filename + '\n')
-                print(f"Имя файла {filename} записано в loaded.txt.")
-        except FileNotFoundError:
-            print(f"Файл {file_path} не найден.")
-        except Exception as e:
-            print(f"Произошла ошибка при чтении файла {filename}: {e}")
-    else:
-        print(f"Файл {filename} уже был обработан.")
+# Получение списка всех файлов в директории и исключение уже загруженных
+all_files = [f for f in os.listdir(dir_path) if f not in loaded_files]
+
+# Проверяем, есть ли незагруженные файлы
+if not all_files:
+    print("Все файлы уже были обработаны.")
+    sys.exit(0)
+
+# Выбор случайного файла для обработки
+filename = random.choice(all_files)
+file_path = os.path.join(dir_path, filename)
+
+# Записываем имя файла в loaded.txt перед обработкой
+with open(loaded_file_path, 'a') as loaded_file:
+    loaded_file.write(filename + '\n')
+
+print(f"Начинаем обработку файла {filename}...")
+
+try:
+    with open(file_path, 'r') as file:
+        count = 0
+        for line in file:
+            record = line.strip()
+            if record:
+                try:
+                    collection.insert_one({'data': record})
+                    count += 1
+                    if count % 10000 == 0:
+                        print(f"Файл {filename}: добавлено {count} записей в базу данных.")
+                except Exception as e:
+                    print(f"Ошибка при добавлении записи в базу данных: {e}")
+        print(f"Закончил чтение и запись файла {filename}. Всего добавлено {count} записей.")
+except FileNotFoundError:
+    print(f"Файл {file_path} не найден.")
+except Exception as e:
+    print(f"Произошла ошибка при чтении файла {filename}: {e}")
 
 # Закрываем соединение с MongoDB
 client.close()
