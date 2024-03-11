@@ -2,7 +2,6 @@ from pymongo import MongoClient
 import sys
 import os
 import argparse
-import random
 
 # Создаем парсер аргументов командной строки
 parser = argparse.ArgumentParser(description='Загрузка файлов в MongoDB')
@@ -34,27 +33,22 @@ if not os.path.exists(loaded_file_path):
     open(loaded_file_path, 'w').close()
     print("Создан файл loaded.txt.")
 
-# Чтение списка уже загруженных файлов
-loaded_files = set()
-with open(loaded_file_path, 'r') as loaded_file:
-    loaded_files = {line.strip() for line in loaded_file}
-
-# Получение списка всех файлов в директории и исключение уже загруженных
-all_files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f)) and f not in loaded_files]
-
-# Проверяем, есть ли незагруженные файлы
-if not all_files:
-    print("Все файлы уже были обработаны.")
-    sys.exit(0)
+# Получение списка всех файлов в директории
+all_files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
 
 # Обработка файлов в цикле
 for filename in all_files:
-    file_path = os.path.join(dir_path, filename)
+    # Проверяем, есть ли файл в loaded.txt
+    with open(loaded_file_path, 'r') as loaded_file:
+        if filename in (line.strip() for line in loaded_file):
+            continue  # Файл уже обработан, переходим к следующему
 
     # Записываем имя файла в loaded.txt перед обработкой
     with open(loaded_file_path, 'a') as loaded_file:
         loaded_file.write(filename + '\n')
 
+    # Файл не обработан, начинаем загрузку
+    file_path = os.path.join(dir_path, filename)
     print(f"Начинаем обработку файла {filename}...")
 
     try:
