@@ -1,34 +1,39 @@
 import os
 import sys
 
+import os
+import sys
+
 def split_file(file_path, max_size):
-    chunk_size = max_size * 1024 * 1024  # 50 мегабайт
+    chunk_size = max_size * 1024 * 1024  # Максимальный размер в байтах
     part_number = 1
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'rb') as file:  # Открываем файл в бинарном режиме
         while True:
             lines = []
             current_size = 0
-            # Читаем строки до тех пор, пока не достигнем желаемого размера файла
             while current_size < chunk_size:
                 line = file.readline()
-                # Если достигнут конец файла, прерываем цикл
                 if not line:
                     break
+                try:
+                    # Пытаемся декодировать строку в UTF-8
+                    line = line.decode('utf-8')
+                except UnicodeDecodeError as e:
+                    # Обработка исключения, если строка не может быть декодирована
+                    print(f"Ошибка декодирования: {e}")
+                    continue  # Пропускаем строку или прерываем обработку
                 lines.append(line)
                 current_size += len(line.encode('utf-8'))
 
-            # Если больше нет данных для чтения, прерываем цикл
             if not lines:
                 break
 
-            # Создаем новый файл для текущей части
             part_file_name = f"{os.path.splitext(file_path)[0]}_{part_number}.txt"
-            with open(part_file_name, 'w') as part_file:
+            with open(part_file_name, 'w', encoding='utf-8') as part_file:
                 part_file.writelines(lines)
                 print(f"Файл {part_file_name} создан.")
 
-            # Увеличиваем номер части
             part_number += 1
 
     print("Разделение файла завершено.")
